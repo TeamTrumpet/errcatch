@@ -99,6 +99,24 @@ func CLIServe(c *cli.Context) error {
 	return nil
 }
 
+// CLISign signs a application token for an app to report to the service.
+func CLISign(c *cli.Context) error {
+	claims := AppClaims{
+		App: c.String("app"),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
+
+	ss, err := token.SignedString([]byte(c.String("secret")))
+	if err != nil {
+		log.Fatal("main", "CLISign", "Can't sign token: %s", err.Error())
+	}
+
+	fmt.Println(ss)
+
+	return nil
+}
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "errcatch"
@@ -119,23 +137,7 @@ func main() {
 					Name: "app",
 				},
 			},
-			Action: func(c *cli.Context) error {
-				claims := AppClaims{
-					App: c.String("app"),
-				}
-
-				token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
-
-				ss, err := token.SignedString([]byte(c.String("secret")))
-				if err != nil {
-					// log.Println(err)
-					return err
-				}
-
-				fmt.Println(ss)
-
-				return nil
-			},
+			Action: CLISign,
 		},
 		{
 			Name:   "serve",
