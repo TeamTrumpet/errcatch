@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta http-equiv="x-ua-compatible" content="ie=edge">
+
+		<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
+		<style type="text/css">
+			body {
+				background: rgb(33, 37, 43);
+				color: rgb(171, 178, 191);
+				font-family: 'Inconsolata', "Helvetica Neue";
+			}
+
+			.error-list {
+				margin-top: 30px;
+			}
+
+			h1 {
+				margin-top: 24px;
+				font-size: 1.5rem;
+				margin-bottom: 24px;
+			}
+
+			.card {
+				border-color: rgb(24, 26, 31);
+				background: transparent;
+			}
+
+			.card-header {
+				background: rgb(41, 45, 53);
+				color: rgb(214, 217, 223);
+				border-bottom-color: rgb(24, 26, 31);
+			}
+
+			.card-header span {
+				color: rgb(152, 190, 95);
+			}
+
+			.card-footer {
+				background: rgb(33, 37, 43);
+				border-top-color: rgb(24, 26, 31);
+				color: rgb(171, 178, 191);
+			}
+
+			.btn-dark {
+				background: RGB(55, 60, 71);
+				border-color: RGB(24, 26, 31);
+				color: RGB(156, 164, 179);
+			}
+
+			.btn-dark:hover {
+				background: rgb(79, 86, 101);
+			}
+
+			header {
+				border-bottom: 1px solid rgb(24, 26, 31);
+			}
+
+			pre {
+				background: rgb(40, 44, 52);
+				color: rgb(171, 178, 191);
+				border-radius: 5px;
+				padding: 10px
+			}
+		</style>
+
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.2.0/list.min.js"></script>
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$(".created-at-timestamp").each(function() {
+					var el = $(this);
+
+					el.text("Received " + moment(el.attr("datetime")).fromNow());
+				});
+
+				$(".delete").on('click', function() {
+					var el = $(this);
+
+					if (confirm("Are you sure you want to resolve this error?")) {
+						$.ajax({
+							url: '/error/' + el.data('id'),
+							type: 'DELETE',
+							success: function() {
+								location.reload();
+							}
+						});
+					}
+				});
+
+				var options = {
+					valueNames: [
+						'id',
+						'app',
+						'payload',
+						{name: 'created_at', attr: 'datetime'}
+					]
+				};
+
+				var sortList = new List('errors', options);
+			});
+		</script>
+	</head>
+	<body>
+		<div id="errors">
+			<header>
+				<div class="container">
+					<div class="row">
+						<div class="col-md-4">
+							<h1>Error Catch<br/><small class="text-muted">Trumpet Interactive Inc.</small></h1>
+						</div>
+						<div class="col-md-8">
+							<form>
+								<fieldset class="form-group">
+									<label for="search">Search</label>
+									<input type="text" class="form-control search" placeholder="Search"/>
+								</fieldset>
+								<div class="form-group btn-group" role="group" aria-label="Sort">
+									<button type="button" class="sort btn btn-dark" data-sort="created_at">Sort by Recieved At</button>
+									<button type="button" class="sort btn btn-dark" data-sort="app">Sort by App</button>
+								</div>
+							</form>
+						</div>
+				</div>
+			</header>
+			<div class="container error-list">
+				<div class="list">
+				{{range .}}
+					<div class="card">
+						<div class="card-header">ID: <span class="id">{{ .ID }}</span> APP: <span class="app">{{ .App }}</span></div>
+						<div class="card-block">
+							<pre class="payload">{{ .PayloadJSON }}</pre>
+							<button type="button" class="btn btn-dark delete" data-id="{{ .ID }}">Resolve Error</button>
+						</div>
+						<div class="card-footer text-muted text-xs-right">
+							<time datetime="{{ .CreatedAt }}" class="created-at-timestamp text-xs-right created_at">{{ .CreatedAt }}</time>
+						</div>
+					</div>
+				{{else}}
+					<div>
+						<strong>no errors</strong>
+					</div>
+				{{end}}
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
