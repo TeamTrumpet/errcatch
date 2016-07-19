@@ -66,6 +66,12 @@ func CLIServe(c *cli.Context) error {
 
 	a := App{db: db}
 
+	env, _ := cfg.String("ENV")
+
+	if env == "production" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	mux := gin.Default()
 
 	listHTML, err := Asset("templates/list.html")
